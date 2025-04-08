@@ -4,6 +4,7 @@ import categoriesRoutes from './routes/categories.js';
 import userRoutes from './routes/user.js';
 
 const app = express();
+app.use(express.json())
 const port = 3000;
 
 app.use('/api/stats',statsRoutes);

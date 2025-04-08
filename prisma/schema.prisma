@@ -6,37 +6,43 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
-  url      = env("DATABASE_URI")
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model Category {
-  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  id    Int    @id @default(autoincrement())
   color String
   name  String
   lines Line[]
 }
 
 model Line {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  color      String?
-  name       String
-  category   Category @relation(fields: [categoryId], references: [id])
-  categoryId String   @db.ObjectId
-  stops      Stop[]
+  id             Int      @id @default(autoincrement())
+  color          String?
+  name           String
+  category       Category @relation(fields: [categoryId], references: [id])
+  categoryId     Int
+  stops          Stop[]
+  firstDeparture String // HH:mm formatted
+  lastDeparture  String // HH:mm formatted
+  createdAt      DateTime @default(now())
 }
 
 model Stop {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
-  name   String
-  lineId String @db.ObjectId
-  Line   Line   @relation(fields: [lineId], references: [id])
-  lat    Int
-  long   Int
+  id        Int      @id @default(autoincrement())
+  name      String
+  order     Int
+  lineId    Int
+  Line      Line     @relation(fields: [lineId], references: [id])
+  lat       Float
+  long      Float
+  createdAt DateTime @default(now())
 }
 
 model User {
-  id    String @id @default(auto()) @map("_id") @db.ObjectId
-  name  String
-  email String
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  createdAt DateTime @default(now())
 }
