@@ -35,8 +35,8 @@ router.get('/distance/stops/:id1/:id2', async (req, res) => { // Get distance be
     }
   })
 
-  const distance = getDistanceFromLatLonInKm(stop1.lat,stop1.long,stop2.lat,stop2.long).toFixed(1)
-  res.json({"distance": distance})
+  const distance = getDistanceFromLatLonInKm(stop1.lat,stop1.long,stop2.lat,stop2.long).toFixed(3)
+  res.status(200).json({"distance": distance})
 
 });
 
@@ -52,13 +52,15 @@ router.get('/distance/lines/:id', async (req,res) => {
   })
 
   let totalDistance = 0
-  for (let i=0;i<Object.keys(allStops).length;i++){
+  for (let i=0;i<Object.keys(allStops).length-1;i++){
     console.log(allStops[i])
 
-    // totalDistance += parseInt(getDistanceFromLatLonInKm(allStops[i].lat,allStops[i].long,allStops[i+1].lat,allStops[i+1].long).toFixed(1))
-    console.log("calc between " + parseInt(i) + " and " + parseInt(i+1) + ", total is " + totalDistance)
-
+    const distance = getDistanceFromLatLonInKm(allStops[i].lat,allStops[i].long,allStops[i+1].lat,allStops[i+1].long)
+    totalDistance += distance
+    console.log("calc between " + allStops[i].name + " and " + allStops[i+1].name + ", distance is " + distance + " (total " + totalDistance + " )")
   }
+
+  res.status(200).json({"distance": totalDistance.toFixed(3)})
     
 })
 
