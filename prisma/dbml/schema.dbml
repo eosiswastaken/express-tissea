@@ -1,0 +1,45 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table Category {
+  id Int [pk, increment]
+  color String [not null]
+  name String [not null]
+  lines Line [not null]
+}
+
+Table Line {
+  id Int [pk, increment]
+  color String
+  name String [not null]
+  category Category [not null]
+  categoryId Int [not null]
+  stops Stop [not null]
+  firstDeparture String [not null]
+  lastDeparture String [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table Stop {
+  id Int [pk, increment]
+  name String [not null]
+  order Int [not null]
+  lineId Int [not null]
+  Line Line [not null]
+  lat Float [not null]
+  long Float [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Table User {
+  id Int [pk, increment]
+  name String [not null]
+  email String [not null]
+  password String [not null]
+  createdAt DateTime [default: `now()`, not null]
+}
+
+Ref: Line.categoryId > Category.id
+
+Ref: Stop.lineId > Line.id

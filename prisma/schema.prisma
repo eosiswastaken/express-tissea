@@ -5,6 +5,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
@@ -44,5 +48,6 @@ model User {
   id        Int      @id @default(autoincrement())
   name      String
   email     String
+  password  String
   createdAt DateTime @default(now())
 }
