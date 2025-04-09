@@ -53,17 +53,16 @@ router.get("/:catId/lines/:lineId/stops", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch lines", message: error });
   }
 });
-
 router.post(
   "/:catId/lines/:lineId/stops",
   [
     body("name").isString().exists(),
-    body("order").isInt({ min: 1 }).exists(),
+    body("order").isInt({ min: 1 }).exists(), // Validation pour que l'order soit strictement positif
     body("lat").isFloat().exists(),
     body("long").isFloat().exists(),
   ],
   async (req, res) => {
-    // Ajoute un arrêt à la ligne :id de la catégorie :id
+    // Valider les données
     const err = validationResult(req);
     if (!err.isEmpty()) {
       return res.status(400).json({ errors: err.array() });
@@ -72,36 +71,40 @@ router.post(
     const { name, order, lat, long } = req.body;
     const lineId = parseInt(req.params.lineId);
 
+    // Vérifier le nombre total d'arrêts pour cette ligne
     const totalStops = await prisma.stop.count({
       where: {
         lineId: lineId,
       },
     });
 
-    const finalOrder =
-      order > Object.keys(totalStops).length ? totalStops + 1 : order;
+    // Si l'ordre est supérieur au nombre total d'arrêts, on place l'arrêt à la fin
+    const finalOrder = order > totalStops ? totalStops + 1 : order;
 
+    // Vérifier si un arrêt avec l'ordre final existe déjà
     const existingStop = await prisma.stop.findFirst({
       where: {
         lineId: lineId,
-        order: finalOrder,
+        order: order,
       },
     });
 
     if (existingStop) {
+      // Si un arrêt avec cet ordre existe, on décale les arrêts suivants
       await prisma.stop.updateMany({
         where: {
           lineId: lineId,
-          order: { gte: finalOrder },
+          order: { gte: finalOrder }, // Trouve tous les arrêts dont l'ordre est supérieur ou égal
         },
         data: {
           order: {
-            increment: 1,
+            increment: 1, // Incrémente l'ordre de tous ces arrêts
           },
         },
       });
     }
 
+    // Créer un nouvel arrêt avec l'ordre final calculé
     await prisma.stop.create({
       data: {
         name,
@@ -113,6 +116,39 @@ router.post(
     });
 
     res.status(200).json({ message: "Stop created" });
+  }
+);
+
+router.put(
+  "/categories/:catId/lines/:lineId",
+  [
+    body("name").isString(),
+    body("color").isString(),
+    body("categoryId").isInt(),
+    body("firstDeparture").isString(),
+    body("lastDeparture").isString(),
+  ],
+  async (req, res) => {
+    // Mettre à jour une ligne
+    const { name, color, categoryId, firstDeparture, lastDeparture } = req.body;
+
+    try {
+      const updatedLine = await prisma.line.update({
+        where: {
+          id: parseInt(req.params.lineId),
+        },
+        data: {
+          name,
+          color,
+          categoryId,
+          firstDeparture,
+          lastDeparture,
+        },
+      });
+      res.json(updatedLine);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update line", message: error });
+    }
   }
 );
 
