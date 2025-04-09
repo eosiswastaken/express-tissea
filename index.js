@@ -1,37 +1,36 @@
-import express from 'express';
-import statsRoutes from './routes/stats.js';
-import categoriesRoutes from './routes/categories.js';
-import userRoutes from './routes/user.js';
-import jwt from 'jsonwebtoken'
-import dotenv from 'dotenv'
+import express from "express";
+import statsRoutes from "./routes/stats.js";
+import categoriesRoutes from "./routes/categories.js";
+import userRoutes from "./routes/user.js";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 
-dotenv.config()
-console.log(process.env.TOKEN_SECRET)
+dotenv.config();
+console.log(process.env.TOKEN_SECRET);
 const app = express();
-app.use(express.json())
+app.use(express.json());
 const port = 3000;
 
-
 function authenticateToken(req, res, next) {
-  const authHeader = req.headers['authorization']
-  const token = authHeader && authHeader.split(' ')[1]
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
 
-  if (token == null) return res.sendStatus(401)
+  if (token == null) return res.sendStatus(401);
 
   jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
-    console.log(err)
+    console.log(err);
 
-    if (err) return res.sendStatus(403)
+    if (err) return res.sendStatus(403);
 
-    req.user = user
+    req.user = user;
 
-    next()
-  })
+    next();
+  });
 }
 
-app.use('/api/stats',authenticateToken,statsRoutes);
-app.use('/api/categories',authenticateToken,categoriesRoutes);
-app.use('/api/users',userRoutes);
+app.use("/api/stats", authenticateToken, statsRoutes);
+app.use("/api/categories", authenticateToken, categoriesRoutes);
+app.use("/api/users", userRoutes);
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
