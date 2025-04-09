@@ -5,6 +5,82 @@ import { body, validationResult } from "express-validator";
 const prisma = new PrismaClient();
 const router = Router();
 
+router.get("/g", (req, res) => {
+  res.send("Hello World");
+});
+
+router.put(
+  "/categories/:catId/lines/:lineId",
+  [
+    body("name").isString(),
+    body("color").isString(),
+    body("categoryId").isInt(),
+    body("firstDeparture").isString(),
+    body("lastDeparture").isString(),
+  ],
+  async (req, res) => {
+    // Mettre à jour une ligne
+    const { name, color, categoryId, firstDeparture, lastDeparture } = req.body;
+
+    try {
+      const updatedLine = await prisma.line.update({
+        where: {
+          id: parseInt(req.params.lineId),
+        },
+        data: {
+          name,
+          color,
+          categoryId,
+          firstDeparture,
+          lastDeparture,
+        },
+      });
+      res.json(updatedLine);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update line", message: error });
+    }
+  }
+);
+
+router.put(
+  "/categories/:catId/lines/:lineId/stops/:stopOrder",
+  async (req, res) => {
+    const { stopOrder, lineId } = req.params;
+
+    const stop = await prisma.stop.findUnique({
+      where: { order: parseInt(stopOrder) },
+    });
+
+    if (!stop) {
+      return res.status(404).json({ message: "Stop not found" });
+    }
+
+    if (stop.lineId !== parseInt(lineId)) {
+      return res
+        .status(400)
+        .json({ message: "Stop does not belong to this line" });
+    }
+
+    await prisma.stop.delete({
+      where: { order: parseInt(stopOrder) },
+    });
+
+    await prisma.stop.updateMany({
+      where: {
+        lineId: lineId,
+        order: { gte: stop.order },
+      },
+      data: {
+        order: {
+          decrement: 1,
+        },
+      },
+    });
+
+    res.status(200).json({ message: "Stop deleted and orders adjusted" });
+  }
+);
+
 router.get("/:catId/lines", async (req, res) => {
   // Liste de toutes les lignes dont l'id de categorie correspond a :id
   try {
@@ -34,7 +110,7 @@ router.get("/:catId/lines/:lineId", async (req, res) => {
   }
 });
 
-router.get("/:catId/lines/:lineId/stops", async (req, res) => {
+router.delete("/:catId/lines/:lineId/stops", async (req, res) => {
   // Liste détaillée des arrêts de la ligne :id de la catégorie :id (nom, lat et long, ordre d'apparition sur la ligne)
   try {
     const lines = await prisma.stop.findMany({
@@ -53,6 +129,7 @@ router.get("/:catId/lines/:lineId/stops", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch lines", message: error });
   }
 });
+
 router.post(
   "/:catId/lines/:lineId/stops",
   [
@@ -116,39 +193,6 @@ router.post(
     });
 
     res.status(200).json({ message: "Stop created" });
-  }
-);
-
-router.put(
-  "/categories/:catId/lines/:lineId",
-  [
-    body("name").isString(),
-    body("color").isString(),
-    body("categoryId").isInt(),
-    body("firstDeparture").isString(),
-    body("lastDeparture").isString(),
-  ],
-  async (req, res) => {
-    // Mettre à jour une ligne
-    const { name, color, categoryId, firstDeparture, lastDeparture } = req.body;
-
-    try {
-      const updatedLine = await prisma.line.update({
-        where: {
-          id: parseInt(req.params.lineId),
-        },
-        data: {
-          name,
-          color,
-          categoryId,
-          firstDeparture,
-          lastDeparture,
-        },
-      });
-      res.json(updatedLine);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to update line", message: error });
-    }
   }
 );
 

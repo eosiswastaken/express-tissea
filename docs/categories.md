@@ -75,8 +75,8 @@ This API provides endpoints to manage lines and stops within categories. It supp
   "name": "Line 1",
   "createdAt": "2025-04-09T12:00:00Z",
   "updatedAt": "2025-04-09T12:00:00Z",
-  "firstVehicle": "Vehicle 1",
-  "lastVehicle": "Vehicle 5"
+  "firstDeparture": "06:00",
+  "lastDeparture": "23:25"
 }
 ```
 
