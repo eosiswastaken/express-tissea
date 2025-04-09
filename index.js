@@ -11,9 +11,6 @@ const app = express();
 app.use(express.json())
 const port = 3000;
 
-function generateAccessToken(hash) {
-  return jwt.sign(hash, process.env.TOKEN_SECRET);
-}
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization']
@@ -32,14 +29,9 @@ function authenticateToken(req, res, next) {
   })
 }
 
-app.get("/token",(req,res) => {
-  const token = generateAccessToken("username")
-  res.json({"token":token})
-})
-
 app.use('/api/stats',authenticateToken,statsRoutes);
 app.use('/api/categories',authenticateToken,categoriesRoutes);
-app.use('/api/users',authenticateToken,userRoutes);
+app.use('/api/users',userRoutes);
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
