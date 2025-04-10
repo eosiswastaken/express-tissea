@@ -1,0 +1,48 @@
+{
+  "name": "express-tissea",
+  "version": "1.0.0",
+  "description": "fake public transport network for zurich",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "faker": "node ./faker.js",
+    "wipe": "npx prisma db push --force-reset",
+    "init": "npm run wipe && npm run faker && npm run dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eosiswastaken/express-tissea.git"
+  },
+  "keywords": [
+    "metro",
+    "train",
+    "tisseo",
+    "tissea",
+    "zurich",
+    "express",
+    "api",
+    "public-transport"
+  ],
+  "author": "eosis",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eosiswastaken/express-tissea/issues"
+  },
+  "homepage": "https://github.com/eosiswastaken/express-tissea#readme",
+  "dependencies": {
+    "@prisma/client": "^6.5.0",
+    "body-parser": "^2.2.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-validator": "^7.2.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.15.0",
+    "nodemon": "^3.1.9",
+    "prisma": "^6.5.0",
+    "simple-body-validator": "^1.3.9"
+  },
+  "devDependencies": {
+    "prisma-dbml-generator": "^0.12.0"
+  }
+}
